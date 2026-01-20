@@ -1,0 +1,14 @@
+# Binary
+*.exe
+*.out
+*.bin
+
+# Go build
+/dist
+/bin
+
+# Vendor
+/vendor
+
+# OS
+.DS_Store
