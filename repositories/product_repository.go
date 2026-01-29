@@ -15,18 +15,27 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 }
 
 func (repo *ProductRepository) GetAll() ([]models.Product, error) {
-	query := "SELECT id, name, price, stock FROM products"
+	query := `
+		SELECT id, name, price, stock, category_id
+		FROM products
+	`
+
 	rows, err := repo.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	products := make([]models.Product, 0)
+	products := []models.Product{}
 	for rows.Next() {
 		var p models.Product
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock, &p.CategoryID)
-		if err != nil {
+		if err := rows.Scan(
+			&p.ID,
+			&p.Name,
+			&p.Price,
+			&p.Stock,
+			&p.CategoryID,
+		); err != nil {
 			return nil, err
 		}
 		products = append(products, p)
