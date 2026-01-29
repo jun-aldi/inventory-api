@@ -74,6 +74,7 @@ func (h *ProductHandler) HandleProductByID(w http.ResponseWriter, r *http.Reques
 }
 
 // GetByID - GET /api/produk/{id}
+
 func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
 	id, err := strconv.Atoi(idStr)

@@ -74,6 +74,7 @@ func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Requ
 }
 
 // GetByID - GET /api/category/{id}
+
 func (h *CategoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/category/")
 	id, err := strconv.Atoi(idStr)
