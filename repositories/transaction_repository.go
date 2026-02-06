@@ -91,3 +91,45 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 		Details:     details,
 	}, nil
 }
+
+// SALES REPORT
+
+// Tambahkan method ini di struct TransactionRepository
+
+func (repo *TransactionRepository) GetSalesReport(startDate, endDate string) (*models.SalesReport, error) {
+	report := &models.SalesReport{}
+
+	queryStat := `
+		SELECT 
+			COALESCE(SUM(total_amount), 0), 
+			COUNT(id) 
+		FROM transactions 
+		WHERE created_at >= $1 AND created_at <= $2`
+
+	err := repo.db.QueryRow(queryStat, startDate, endDate).Scan(&report.TotalRevenue, &report.TotalTransaction)
+	if err != nil {
+		return nil, err
+	}
+
+	queryTop := `
+		SELECT 
+			p.name, 
+			SUM(td.quantity) as total_qty
+		FROM transaction_details td
+		JOIN transactions t ON td.transaction_id = t.id
+		JOIN products p ON td.product_id = p.id
+		WHERE t.created_at >= $1 AND t.created_at <= $2
+		GROUP BY p.name
+		ORDER BY total_qty DESC
+		LIMIT 1`
+
+	err = repo.db.QueryRow(queryTop, startDate, endDate).Scan(&report.TopProduct.Name, &report.TopProduct.TotalSold)
+
+	if err == sql.ErrNoRows {
+		report.TopProduct = models.BestSellingProduct{Name: "-", TotalSold: 0}
+	} else if err != nil {
+		return nil, err
+	}
+
+	return report, nil
+}

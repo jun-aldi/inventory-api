@@ -16,3 +16,7 @@ func NewTransactionService(repo *repositories.TransactionRepository) *Transactio
 func (s *TransactionService) Checkout(items []models.CheckoutItem, useLock bool) (*models.Transaction, error) {
 	return s.repo.CreateTransaction(items)
 }
+
+func (s *TransactionService) GetReport(startDate, endDate string) (*models.SalesReport, error) {
+	return s.repo.GetSalesReport(startDate, endDate)
+}
