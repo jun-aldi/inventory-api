@@ -65,6 +65,14 @@ func main() {
 	// CHECKOUT ROUTE
 	http.HandleFunc("/api/checkout", transactionHandler.HandleCheckout)
 
+	//REPORT
+
+	//Today
+	http.HandleFunc("/api/report/hari-ini", transactionHandler.HandleReport)
+
+	// filter day
+	http.HandleFunc("/api/report", transactionHandler.HandleReport)
+
 	// /health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
