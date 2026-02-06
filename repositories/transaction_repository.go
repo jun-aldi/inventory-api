@@ -36,6 +36,10 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 			return nil, err
 		}
 
+		if stock < item.Quantity {
+			return nil, fmt.Errorf("insufficient stock for product %s", productName)
+		}
+
 		subtotal := productPrice * item.Quantity
 		totalAmount += subtotal
 
@@ -58,10 +62,20 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 		return nil, err
 	}
 
-	for i := range details {
-		details[i].TransactionID = transactionID
-		_, err = tx.Exec("INSERT INTO transaction_details (transaction_id, product_id, quantity, subtotal) VALUES ($1, $2, $3, $4)",
-			transactionID, details[i].ProductID, details[i].Quantity, details[i].Subtotal)
+	if len(details) > 0 {
+		query := "INSERT INTO transaction_details (transaction_id, product_id, quantity, subtotal) VALUES "
+		var args []interface{}
+
+		for i := range details {
+			details[i].TransactionID = transactionID
+			base := i * 4
+			query += fmt.Sprintf("($%d, $%d, $%d, $%d),", base+1, base+2, base+3, base+4)
+			args = append(args, transactionID, details[i].ProductID, details[i].Quantity, details[i].Subtotal)
+		}
+
+		query = query[:len(query)-1]
+
+		_, err = tx.Exec(query, args...)
 		if err != nil {
 			return nil, err
 		}

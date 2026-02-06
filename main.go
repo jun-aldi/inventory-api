@@ -54,13 +54,16 @@ func main() {
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	// Setup routes
+
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
 	http.HandleFunc("/api/product/", productHandler.HandleProductByID)
 
+	// CATEGORY ROUTE
 	http.HandleFunc("/api/category", categoryHandler.HandleCategories)
 	http.HandleFunc("/api/category/", categoryHandler.HandleCategoryByID)
 
-	http.HandleFunc("/api/checkout", transactionHandler.Checkout)
+	// CHECKOUT ROUTE
+	http.HandleFunc("/api/checkout", transactionHandler.HandleCheckout)
 
 	// /health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
