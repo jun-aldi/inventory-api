@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kasir-api/database"
 	"kasir-api/handlers"
+	"kasir-api/middleware"
 	"kasir-api/repositories"
 	"kasir-api/services"
 	"log"
@@ -18,6 +19,7 @@ import (
 type Config struct {
 	Port   string `mapstructure:"PORT"`
 	DBConn string `mapstructure:"DB_CONN"`
+	APIKey string `mapstructure:"API_KEY"`
 }
 
 func main() {
@@ -33,6 +35,7 @@ func main() {
 	config := Config{
 		Port:   viper.GetString("PORT"),
 		DBConn: viper.GetString("DB_CONN"),
+		APIKey: viper.GetString("API_KEY"),
 	}
 
 	db, err := database.InitDB(config.DBConn)
@@ -40,6 +43,8 @@ func main() {
 		log.Fatal("Failed to initialize database:", err)
 	}
 	defer db.Close()
+
+	apiKeyMiddleware := middleware.APIKey(config.APIKey)
 
 	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
@@ -56,14 +61,14 @@ func main() {
 	// Setup routes
 
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
-	http.HandleFunc("/api/product/", productHandler.HandleProductByID)
+	http.HandleFunc("/api/product/", apiKeyMiddleware(productHandler.HandleProductByID))
 
 	// CATEGORY ROUTE
 	http.HandleFunc("/api/category", categoryHandler.HandleCategories)
-	http.HandleFunc("/api/category/", categoryHandler.HandleCategoryByID)
+	http.HandleFunc("/api/category/", apiKeyMiddleware(categoryHandler.HandleCategoryByID))
 
 	// CHECKOUT ROUTE
-	http.HandleFunc("/api/checkout", transactionHandler.HandleCheckout)
+	http.HandleFunc("/api/checkout", apiKeyMiddleware(transactionHandler.HandleCheckout))
 
 	//REPORT
 
