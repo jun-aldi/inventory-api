@@ -22,6 +22,24 @@ type Config struct {
 	APIKey string `mapstructure:"API_KEY"`
 }
 
+// --- TAMBAHAN: FUNGSI CORS MIDDLEWARE ---
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 
 	viper.AutomaticEnv()
@@ -59,6 +77,7 @@ func main() {
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	// Setup routes
+	// Karena Anda menggunakan http.HandleFunc, ini mendaftar ke http.DefaultServeMux
 
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
 	http.HandleFunc("/api/product/", middleware.Logger(apiKeyMiddleware(productHandler.HandleProductByID)))
@@ -93,7 +112,8 @@ func main() {
 	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server running di", addr)
 
-	err = http.ListenAndServe(addr, nil)
+	err = http.ListenAndServe(addr, CORSMiddleware(http.DefaultServeMux))
+
 	if err != nil {
 		fmt.Println("gagal running server", err)
 	}
