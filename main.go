@@ -61,14 +61,14 @@ func main() {
 	// Setup routes
 
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
-	http.HandleFunc("/api/product/", apiKeyMiddleware(productHandler.HandleProductByID))
+	http.HandleFunc("/api/product/", middleware.Logger(apiKeyMiddleware(productHandler.HandleProductByID)))
 
 	// CATEGORY ROUTE
 	http.HandleFunc("/api/category", categoryHandler.HandleCategories)
-	http.HandleFunc("/api/category/", apiKeyMiddleware(categoryHandler.HandleCategoryByID))
+	http.HandleFunc("/api/category/", middleware.Logger(apiKeyMiddleware(categoryHandler.HandleCategoryByID)))
 
 	// CHECKOUT ROUTE
-	http.HandleFunc("/api/checkout", apiKeyMiddleware(transactionHandler.HandleCheckout))
+	http.HandleFunc("/api/checkout", middleware.Logger(apiKeyMiddleware(transactionHandler.HandleCheckout)))
 
 	//REPORT
 
